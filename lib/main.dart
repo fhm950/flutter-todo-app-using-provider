@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_learning/model/todo_model.dart';
 import 'package:provider_learning/provider/todo_provider.dart';
@@ -43,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Add TODO List"),
+          title: const Text("Add TODO List"),
           content: TextField(
             controller: _textController,
             decoration: const InputDecoration(hintText: "write to do item"),
@@ -51,6 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
           actions: [
             TextButton(
               onPressed: () {
+                _textController.clear();
                 Navigator.pop(context);
               },
               child: const Text("Cancel")
@@ -105,9 +107,35 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Expanded(
               flex: 3,
-              child: ListView.builder(itemBuilder: (context, itemIndex) {
+              child: ListView.builder(
+                itemBuilder: (context, itemIndex) {
                 return ListTile(
-                  title: Text(provider.allTODOList[itemIndex].title),
+                  onTap: () {
+                    provider.todoStatusChange(provider.allTODOList[itemIndex]);
+                  },
+                  leading: MSHCheckbox(
+                    size: 30,
+                    value: provider.allTODOList[itemIndex].isCompleted,
+                    colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(checkedColor: Colors.blue),
+                    style: MSHCheckboxStyle.stroke,
+                    onChanged: (selected) {
+                      provider.todoStatusChange(provider.allTODOList[itemIndex]);
+                    },
+                  ),
+                  title: Text(
+                    provider.allTODOList[itemIndex].title,
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      decoration: provider.allTODOList[itemIndex].isCompleted == true ? TextDecoration.lineThrough : null
+                    ),
+                  ),
+                  trailing: IconButton(
+                    onPressed: () {
+                      provider.deleteTODOList(provider.allTODOList[itemIndex]);
+                    },
+                    icon: const Icon(Icons.delete),
+                  ),
                 );
               }, itemCount: provider.allTODOList.length,)
             )
@@ -118,8 +146,8 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           _showDialogue();
         },
-        child: Icon(Icons.add),
         backgroundColor: const Color(0xFF622CA7),
+        child: const Icon(Icons.add),
       ),
     );
   }
